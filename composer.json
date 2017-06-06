@@ -1,0 +1,15 @@
+{
+    "name": "weber/eval",
+    "description": "api",
+    "type": "project",
+    "minimum-stability": "stable",
+    "autoload": {
+		"psr-4": {
+			"CS4450\\": "src/"
+		}
+	},
+	"require": {
+        "firebase/php-jwt": "^4.0",
+        "nikic/fast-route": "^1.2"
+    }
+}
