@@ -8,6 +8,24 @@ use CS4450\Utilities\DatabaseConnection;
 
 class InstructorsController
 {
+
+    public static function getAllInstructors(){
+        $db = DatabaseConnection::getInstance();
+
+        $queryGetAllInstructors= '
+            SELECT DISTINCT inst.instructorID, u.FirstName, u.LastName 
+            FROM Users u
+            JOIN InstructorDepartments inst
+            ON u.Id = inst.instructorID
+            ORDER BY u.LastName, u.FirstName
+		';
+
+        $stmtGetAllInstructors = $db->prepare($queryGetAllInstructors);
+        $stmtGetAllInstructors->execute();
+
+        return $stmtGetAllInstructors->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 	public static function getAllInstructorsBasedOnDepartments(){
 		$db = DatabaseConnection::getInstance();
 		$data = (object) json_decode(file_get_contents('php://input'));
@@ -18,7 +36,7 @@ class InstructorsController
 		
 		$queryGetUsersRoles = '
 			SELECT roleID
-			FROM Evals_UserDepartmentRoles
+			FROM UserRoles
 			WHERE userID = :userID
 		';
 		
@@ -33,13 +51,13 @@ class InstructorsController
 		for($i=0; $i<count($departmentsSelected); $i++){
 			$querySeeIfThisUserIDIsRelatedToThisDepartment = '
 				SELECT count(*) as Count
-				FROM Evals_UserDepartmentRoles
-				WHERE userID = :userID
+				FROM InstructorDepartments
+				WHERE instructorID = :userID
 				AND departmentCode = :departmentCode
 			';
-			
+
 			$stmtSeeIfThisUserIDIsRelatedToThisDepartment = $db->prepare($querySeeIfThisUserIDIsRelatedToThisDepartment);
-			
+
 			$stmtSeeIfThisUserIDIsRelatedToThisDepartment->bindValue(':userID', $userID);
 			$stmtSeeIfThisUserIDIsRelatedToThisDepartment->bindValue(':departmentCode', $departmentsSelected[$i]->DepartmentCode);
 			if(!$stmtSeeIfThisUserIDIsRelatedToThisDepartment->execute()){
@@ -74,11 +92,11 @@ class InstructorsController
 			// this code is to just return all users who are related to the logged in instructor
 			if($stmtSeeIfThisUserIDIsRelatedToThisDepartment->fetch(PDO::FETCH_ASSOC)['Count'] != 0){
 				$queryGetAllUsersInThisDepartment = '
-					SELECT DISTINCT userID, departmentCode, FirstName, LastName 
-					FROM Evals_UserDepartmentRoles udr
-					JOIN Users u
-					ON udr.userID = u.Id
-					WHERE departmentCode = :departmentCode
+					SELECT DISTINCT inst.instructorID, inst.departmentCode, u.FirstName, u.LastName 
+                    FROM Users u
+                    JOIN InstructorDepartments inst
+                    ON u.Id = inst.instructorID
+					WHERE inst.departmentCode = :departmentCode
 				';
 				
 				$stmtGetAllUsersInThisDepartment = $db->prepare($queryGetAllUsersInThisDepartment);

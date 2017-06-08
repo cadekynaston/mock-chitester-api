@@ -197,6 +197,12 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) u
 	};
 	$r->addRoute('POST',     $baseURI . '/instructors',   $handleGettingAllInstructorsBasedOnDepartments);
 	$r->addRoute('POST',     $baseURI . '/instructors/',   $handleGettingAllInstructorsBasedOnDepartments);
+
+    $handleGettingAllInstructors = function(){
+        return (new CS4450\Controllers\InstructorsController)->getAllInstructors();
+    };
+    $r->addRoute('GET',     $baseURI . '/instructors',   $handleGettingAllInstructors);
+    $r->addRoute('GET',     $baseURI . '/instructors/',   $handleGettingAllInstructors);
 	
 	//*********************************************************************************
 	$handleGetSemestersFromYears = function(){
